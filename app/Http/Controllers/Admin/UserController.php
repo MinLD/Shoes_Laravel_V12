@@ -1,43 +1,62 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use Illuminate\Support\Facades\Hash; // <-- Thêm
+use Illuminate\Validation\Rules\Password; // <-- Thêm
 use App\Http\Controllers\Controller;
+use App\Models\Profile;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 class UserController extends Controller
-{
-   public function index(Request $request)
+
+{   
+    /**
+     * Tạo một người dùng mới.
+     */
+    public function store(Request $request)
     {
-        // 3. Lấy tham số 'view' từ URL, nếu không có thì mặc định là 'users'
-        $viewType = $request->query('view', 'users');
+        // 1. Validate dữ liệu (bao gồm cả mật khẩu)
+        $validatedData = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'role_id' => ['required', 'integer', 'exists:roles,id'],
+            'phone_number' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string', 'max:255'],
 
-        $data = [];
-        $data['viewType'] = $viewType; // Gửi biến này sang view
-        $data['roles'] = Role::all();
+        ]);
+        
 
-        // 4. Logic IF/ELSE để lấy đúng dữ liệu
-        if ($viewType === 'users') {
-            $data['users'] = User::with('roles', 'profile')->paginate(15);
+        // 2. Tạo User
+        $user = User::create([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+            
+        ]);
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id], // Search condition
+            [
+                'phone_number' => $validatedData['phone_number'],
+                'address' => $validatedData['address'],
+                'avatar' => 'default_avatar.png' // Set on create
+            ]
+        );
         
-        } elseif ($viewType === 'categories') {
-            // (Bạn cần tự tạo Model/Controller cho cái này)
-            // $data['categories'] = Category::paginate(15); // Ví dụ
-            "data['categories'] = Category::paginate(15);";
         
-        } elseif ($viewType === 'products') {
-            // (Bạn cần tự tạo Model/Controller cho cái này)
-            // $data['products'] = Product::paginate(15); // Ví dụ
-            "data['products'] = Product::paginate(15);";
-        
-        }
+        // 3. Gán Role
+        $user->roles()->sync([$validatedData['role_id']]);
 
-        // 5. Trả về view với mảng $data
-        return view('admin.dashboard', $data);
+        
+        // (Lưu ý: Profile sẽ được tự động tạo bởi hàm boot() trong Model User)
+        toastify()->success('Đã tạo người dùng thành công.');
+
+        return redirect()->route('admin.dashboard', ['view' => 'users'])
+                         ->with('success', 'Đã tạo người dùng thành công.');
     }
+
 
     /**
      * Cập nhật thông tin user.
@@ -76,7 +95,7 @@ class UserController extends Controller
         $user->roles()->sync([$validatedData['role_id']]);
 
         toastify()->success('Cập nhật người dùng thành công.');
-        return redirect()->route('admin.users.index', ['view' => 'users']);
+        return redirect()->route('admin.dashboard', ['view' => 'users']);
     }
     public function destroy(User $user)
     {

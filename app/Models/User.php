@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Profile;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Role;
+use App\Models\Cart;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Order;
+
 class User extends Authenticatable
+
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -82,5 +89,22 @@ class User extends Authenticatable
     {
         return $this->roles()->where('name', $roleName)->exists();
     }
+
+    /**
+     * Mỗi User có (1) giỏ hàng.
+     */
+    public function cart(): HasOne
+    {
+        return $this->hasOne(Cart::class);
+    }
+
+    /**
+     * Mỗi User có (N) đơn hàng.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
 
 }
