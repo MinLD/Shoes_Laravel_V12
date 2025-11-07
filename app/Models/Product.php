@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\Scopes\PublishedScope;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Product extends Model
 {
     use HasFactory;
@@ -22,6 +25,7 @@ class Product extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
+        // Tắt GlobalScope PublishedScope KHI TÌM BẰNG ROUTE
         return $this->withoutGlobalScope(PublishedScope::class)
                     ->where($field ?? $this->getRouteKeyName(), $value)
                     ->firstOrFail();
@@ -30,7 +34,7 @@ class Product extends Model
     /**
      * Sản phẩm này thuộc về một danh mục.
      */
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
@@ -38,7 +42,7 @@ class Product extends Model
     /**
      * Sản phẩm này có nhiều ảnh (gallery).
      */
-    public function images()
+    public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);
     }
@@ -46,7 +50,7 @@ class Product extends Model
     /**
      * Sản phẩm này có nhiều biến thể (loại).
      */
-    public function variants()
+    public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
     }

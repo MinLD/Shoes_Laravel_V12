@@ -6,14 +6,29 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\Category_Client_Controller;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Product_Client_Controller;
 
 // 1. Route công khai (Landing Page)
 // Bất kỳ ai cũng có thể xem
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+// ===== THÊM ROUTE MỚI CHO TRANG CHI TIẾT (Placeholder) =====
+Route::get('/products/{product:slug}', [Product_Client_Controller::class, 'show'])->name('product.show');
+
+Route::get('/categories/{category:slug}', [Category_Client_Controller::class, 'show'])->name('category.show');
+
+// ===== THÊM ROUTE MỚI CHO GIỎ HÀNG =====
+// 'auth' middleware bắt buộc user phải đăng nhập mới được thêm vào giỏ
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
 });
 
 
@@ -67,8 +82,11 @@ Route::middleware(['auth', 'verified', 'role.gate'])->group(function () {
 
     // ===== ROUTE XỬ LÝ PRODUCT IMAGES (Upload/Delete) =====
     Route::post('/admin/products/{product}/images', [ProductImageController::class, 'store'])->name('admin.images.store');
-        Route::delete('/admin/products/{product}/images/{image}', [ProductImageController::class, 'destroy'])->name('admin.images.destroy');
+    Route::delete('/admin/products/{product}/images/{image}', [ProductImageController::class, 'destroy'])->name('admin.images.destroy');
 
+    // ===== ROUTE XỬ LÝ ORDERS (Show/Update) =====
+    Route::get('/admin/orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
+    Route::patch('/admin/orders/{order}', [OrderController::class, 'update'])->name('admin.orders.update');
 });
 
 

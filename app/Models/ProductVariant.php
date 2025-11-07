@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\CartItem;
 use App\Models\OrderItem;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductVariant extends Model
 {
@@ -25,9 +26,10 @@ class ProductVariant extends Model
     /**
      * Biến thể này thuộc về một sản phẩm.
      */
-    public function product()
+   public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
+        // Chỉ định rõ: 'product_id' (ở bảng này) liên kết với 'id' (ở bảng products)
+        return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
     /**

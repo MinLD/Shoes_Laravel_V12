@@ -15,6 +15,23 @@ class Cart extends Model
 {
     use HasFactory;
     protected $fillable = ['user_id'];
+    protected $appends = ['total_amount'];
+
+    public function getTotalAmountAttribute()
+    {
+        // Đảm bảo 'items.productVariant' đã được tải
+        if ( ! $this->relationLoaded('items')) {
+            $this->load('items.productVariant');
+        }
+
+        return $this->items->sum(function ($item) {
+            // Kiểm tra xem biến thể còn tồn tại không
+            if ($item->productVariant) {
+                return $item->quantity * $item->productVariant->price;
+            }
+            return 0; // Nếu biến thể đã bị xóa
+        });
+    }
 
     /**
      * Giỏ hàng này thuộc về (1) User.

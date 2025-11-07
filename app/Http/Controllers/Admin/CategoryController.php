@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str; // Import Str để tạo slug
 use Illuminate\Validation\Rule;
 use Cloudinary\Cloudinary;
+use App\Models\ProductVariant;
 class CategoryController extends Controller
 {
     protected $cloudinary;

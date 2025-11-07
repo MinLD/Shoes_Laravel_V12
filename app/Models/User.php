@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Models\Cart;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 
@@ -73,12 +74,12 @@ class User extends Authenticatable
         });
     }
     //1-1
-    public function profile()
+    public function profile(): HasOne
     {
         return $this->hasOne(Profile::class);
     }
     //n-n
-    public function roles()
+    public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);
     }
