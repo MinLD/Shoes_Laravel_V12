@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\ProductVariantController;
 
 // 1. Route công khai (Landing Page)
@@ -60,9 +61,14 @@ Route::middleware(['auth', 'verified', 'role.gate'])->group(function () {
     // Thêm (store) 1 biến thể mới cho 1 sản phẩm
     Route::post('/admin/products/{product}/variants', [ProductVariantController::class, 'store'])->name('admin.variants.store');
     // Cập nhật (update) 1 biến thể cụ thể
-    Route::patch('/admin/variants/{variant}', [ProductVariantController::class, 'update'])->name('admin.variants.update');
+    Route::patch('/admin/products/{product}/variants/{variant}', [ProductVariantController::class, 'update'])->name('admin.variants.update');
     // Xóa (destroy) 1 biến thể cụ thể
-    Route::delete('/admin/variants/{variant}', [ProductVariantController::class, 'destroy'])->name('admin.variants.destroy');
+    Route::delete('/admin/products/{product}/variants/{variant}', [ProductVariantController::class, 'destroy'])->name('admin.variants.destroy');
+
+    // ===== ROUTE XỬ LÝ PRODUCT IMAGES (Upload/Delete) =====
+    Route::post('/admin/products/{product}/images', [ProductImageController::class, 'store'])->name('admin.images.store');
+        Route::delete('/admin/products/{product}/images/{image}', [ProductImageController::class, 'destroy'])->name('admin.images.destroy');
+
 });
 
 

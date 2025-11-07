@@ -19,6 +19,7 @@ class ProductVariant extends Model
         'price',
         'stock_quantity',
         'image_url',
+        'public_id',
     ];
 
     /**

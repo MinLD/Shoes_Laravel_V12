@@ -9,7 +9,11 @@ use App\Models\Product;
 class ProductImage extends Model
 {
     use HasFactory;
-    protected $fillable = ['product_id', 'image_url'];
+    protected $fillable = [
+    'product_id', 
+    'image_url', 
+    'public_id'
+];
 
     /**
      * Ảnh này thuộc về một sản phẩm.

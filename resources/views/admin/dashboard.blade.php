@@ -163,11 +163,11 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
     type="button" 
-    @click.prevent="
+    @click.prevent='
         isCreatingCategory = false;
         editCategory = @json($category);
-        $dispatch('open-modal', 'category-modal');
-    "
+        $dispatch("open-modal", "category-modal");
+    '
     class="text-indigo-600 hover:text-indigo-900 mr-4">
     Chỉnh sửa
 </button>
@@ -223,11 +223,13 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {{ $product->variants->count() }}
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-5">
                     
-                    <a href="{{ route('admin.products.edit', $product) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">
+                <div>
+                    <a href="{{ route('admin.products.edit', $product) }}" class="text-indigo-600 hover:text-indigo-900 ">
                         Chỉnh sửa
                     </a>
+                </div>
 
                     <form classG="inline" action="{{ route('admin.products.destroy', $product) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa? Thao tác này sẽ xóa tất cả biến thể con!');">
                         @csrf
@@ -331,48 +333,62 @@
             {{-- =============================================== --}}
         {{-- MODAL THÊM/SỬA DANH MỤC --}}
         {{-- =============================================== --}}
-        <x-modal name="category-modal" max-width="lg">
+       <x-modal name="category-modal" max-width="lg">
             
-            <form 
-                :action="isCreatingCategory ? '{{ route('admin.categories.store') }}' : `/admin/categories/${editCategory.id}`" 
-                method="POST" class="p-6"
-            >
-                @csrf
-                <template x-if="!isCreatingCategory">
-                    @method('PATCH')
-                </template>
+            <template x-if="editCategory">
+                
+                <form 
+                    :action="isCreatingCategory ? '{{ route('admin.categories.store') }}' : `/admin/categories/${editCategory.id}`" 
+                    method="POST" class="p-6" enctype="multipart/form-data"
+                >
+                    @csrf
+                    <template x-if="!isCreatingCategory">
+                        @method('PATCH')
+                    </template>
 
-                <h2 class="text-lg font-medium text-gray-900">
-                    <span x-text="isCreatingCategory ? 'Tạo Danh Mục Mới' : 'Chỉnh sửa Danh Mục'"></span>
-                </h2>
+                    <h2 class="text-lg font-medium text-gray-900">
+                        <span x-text="isCreatingCategory ? 'Tạo Danh Mục Mới' : 'Chỉnh sửa Danh Mục'"></span>
+                    </h2>
 
-                <div class="mt-6 space-y-4">
-                    <div>
-                        <x-input-label for="cat_name" :value="__('Tên Danh Mục')" />
-                        <x-text-input id="cat_name" name="name" type="text" class="mt-1 block w-full" x-model="editCategory.name" required />
+                    <div class="mt-6 space-y-4">
+                        <div>
+                            <x-input-label for="cat_name" :value="__('Tên Danh Mục')" />
+                            <x-text-input id="cat_name" name="name" type="text" class="mt-1 block w-full" x-model="editCategory.name" required />
+                        </div>
+                        
+                        <div>
+                            <x-input-label for="cat_description" :value="__('Mô tả')" />
+                            <textarea id="cat_description" name="description" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" x-model="editCategory.description"></textarea>
+                        </div>
+
+                        <div>
+                            <x-input-label for="cat_image" :value="__('Ảnh Danh Mục (Tùy chọn)')" />
+                            
+                            <template x-if="!isCreatingCategory && editCategory.image_url">
+                                <img :src="editCategory.image_url" alt="Ảnh hiện tại" class="w-20 h-20 rounded-md object-cover my-2">
+                            </template>
+                            
+                            <input id="cat_image" name="image" type="file"
+                                class="mt-1 block w-full text-sm text-gray-500
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded-md file:border-0
+                                        file:bg-indigo-50 file:text-indigo-700
+                                        hover:file:bg-indigo-100" />
+                            <p class="mt-1 text-xs text-gray-500">Bỏ trống nếu không muốn thay đổi ảnh.</p>
+                        </div>
                     </div>
-                    
-                    <div>
-                        <x-input-label for="cat_description" :value="__('Mô tả')" />
-                        <textarea id="cat_description" name="description" rows="3" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" x-model="editCategory.description"></textarea>
+
+                    <div class="mt-6 flex justify-end">
+                        <x-secondary-button @click.prevent="$dispatch('close')">
+                            {{ __('Đóng') }}
+                        </x-secondary-button>
+
+                        <x-primary-button class="ml-3">
+                            <span x-text="isCreatingCategory ? 'Tạo' : 'Lưu thay đổi'"></span>
+                        </x-primary-button>
                     </div>
-
-                    <div>
-                        <x-input-label for="cat_image_url" :value="__('Link Ảnh (URL)')" />
-                        <x-text-input id="cat_image_url" name="image_url" type="url" class="mt-1 block w-full" x-model="editCategory.image_url" placeholder="https://..." />
-                    </div>
-                </div>
-
-                <div class="mt-6 flex justify-end">
-                    <x-secondary-button @click.prevent="$dispatch('close')">
-                        {{ __('Đóng') }}
-                    </x-secondary-button>
-
-                    <x-primary-button class="ml-3">
-                        <span x-text="isCreatingCategory ? 'Tạo' : 'Lưu thay đổi'"></span>
-                    </x-primary-button>
-                </div>
-            </form>
+                </form>
+            </template>
         </x-modal>
         {{-- Hết Modal Category --}}
 

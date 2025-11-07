@@ -15,6 +15,7 @@
         showVariantModal: false,
         isCreatingVariant: false,
         editVariant: null,
+        
         openVariantModal(isCreating, variant = null) {
             this.isCreatingVariant = isCreating;
             if (isCreating) {
@@ -127,6 +128,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ảnh</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Màu Sắc</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
@@ -137,20 +139,27 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($product->variants as $variant)
                     <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @if($variant->image_url)
+                                <img src="{{ $variant->image_url }}" alt="{{ $variant->name }}" class="w-10 h-10 rounded-md object-cover">
+                            @else
+                                <span class="text-gray-400">N/A</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $variant->color ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $variant->size ?? '-' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ number_format($variant->price, 0, ',', '.') }} đ</td>
                         <td class="px-6 py-4 whitespace-nowrap">{{ $variant->stock_quantity }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             
-                            <button
-                                type="button" 
-                                @click.prevent="openVariantModal(false, @json($variant))"
-                                class="text-indigo-600 hover:text-indigo-900 mr-4">
-                                Chỉnh sửa
-                            </button>
+                        <button
+    type="button" 
+    @click.prevent='openVariantModal(false, @json($variant))'
+    class="text-indigo-600 hover:text-indigo-900 mr-4">
+    Chỉnh sửa
+</button>
 
-                            <form class="inline" action="{{ route('admin.variants.destroy', $variant) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa biến thể này?');">
+                            <form class="inline" action="{{ route('admin.variants.destroy', ['product' => $product, 'variant' => $variant]) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa biến thể này?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900">Xóa</button>
@@ -173,16 +182,59 @@
                
 
                 <div x-show="tab === 'images'">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div class="p-6 text-gray-900">
-                            <h3 class="text-lg font-medium">Quản lý Thư viện Ảnh</h3>
-                            <p class="mt-2 text-sm text-gray-600">
-                                Đây là nơi bạn sẽ upload nhiều hình ảnh cho sản phẩm này.
-                            </p>
-                            </div>
-                    </div>
-                </div>
+    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="p-6 text-gray-900">
+            <h3 class="text-lg font-medium">Quản lý Thư viện Ảnh</h3>
+            <p class="mt-2 text-sm text-gray-600 mb-4">
+                Upload nhiều ảnh cho sản phẩm. Các ảnh này sẽ hiển thị trong thư viện ảnh (gallery) của trang chi tiết sản phẩm.
+            </p>
 
+            <form action="{{ route('admin.images.store', $product) }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div>
+                    <x-input-label for="images" :value="__('Chọn ảnh mới (có thể chọn nhiều ảnh)')" />
+                    <input id="images" name="images[]" type="file" multiple
+                           class="mt-1 block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:bg-indigo-50 file:text-indigo-700
+                                  hover:file:bg-indigo-100" />
+                    @error('images.*')
+                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div class="mt-4">
+                    <x-primary-button>{{ __('Upload Ảnh') }}</x-primary-button>
+                </div>
+            </form>
+
+            <div class="mt-8">
+                <h4 class="text-md font-medium">Các ảnh hiện tại:</h4>
+                @if($product->images->isEmpty())
+                    <p class="mt-2 text-sm text-gray-500">Sản phẩm này chưa có ảnh nào trong thư viện.</p>
+                @else
+                    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        @foreach ($product->images as $image)
+                            <div classs="relative group border rounded-lg overflow-hidden">
+                                <img src="{{ $image->image_url }}" alt="Ảnh sản phẩm" class="h-40 w-full object-cover">
+                                <div class="p-2">
+                                    <form action="{{ route('admin.images.destroy', ['product' => $product, 'image' => $image]) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa ảnh này?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type-="submit" class="text-red-600 hover:text-red-900 text-sm w-full text-center">
+                                            Xóa ảnh
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </div>
@@ -191,11 +243,12 @@
     {{-- =============================================== --}}
     {{-- MODAL THÊM/SỬA BIẾN THỂ --}}
     {{-- =============================================== --}}
-    <x-modal name="variant-modal" max-width="lg">
+ <x-modal name="variant-modal" max-width="lg">
         <template x-if="editVariant">
+            
             <form 
                 :action="isCreatingVariant ? '{{ route('admin.variants.store', $product) }}' : `/admin/variants/${editVariant.id}`" 
-                method="POST" class="p-6"
+                method="POST" class="p-6" enctype="multipart/form-data"
             >
                 @csrf
                 <template x-if="!isCreatingVariant">
@@ -231,8 +284,17 @@
                     </div>
                     
                     <div class="sm:col-span-2">
-                        <x-input-label for="var_image_url" :value="__('Link Ảnh Đại Diện (cho màu này)')" />
-                        <x-text-input id="var_image_url" name="image_url" type="url" class="mt-1 block w-full" x-model="editVariant.image_url" placeholder="https://..." />
+                        <x-input-label for="var_image" :value="__('Ảnh Đại Diện (cho màu này)')" />
+                        <template x-if="!isCreatingVariant && editVariant.image_url">
+                            <img :src="editVariant.image_url" alt="Ảnh hiện tại" class="w-20 h-20 rounded-md object-cover my-2">
+                        </template>
+                        <input id="var_image" name="image" type="file"
+                               class="mt-1 block w-full text-sm text-gray-500
+                                      file:mr-4 file:py-2 file:px-4
+                                      file:rounded-md file:border-0
+                                      file:bg-indigo-50 file:text-indigo-700
+                                      hover:file:bg-indigo-100" />
+                        <p class="mt-1 text-xs text-gray-500">Bỏ trống nếu không muốn thay đổi ảnh.</p>
                     </div>
                 </div>
 
@@ -248,5 +310,6 @@
             </form>
         </template>
     </x-modal>
+    
 </div>
 </x-app-layout>

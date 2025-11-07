@@ -10,7 +10,7 @@ use App\Models\Product;
 class Category extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'slug', 'description', 'image_url'];
+    protected $fillable = ['name', 'slug', 'description', 'image_url','public_id',];
     /**
      * Một danh mục có nhiều sản phẩm.
      */
