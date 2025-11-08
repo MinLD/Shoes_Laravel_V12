@@ -1,4 +1,6 @@
 <?php
+use Illuminate\Http\Request; 
+
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Admin\AdminController;
@@ -14,14 +16,20 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\Category_Client_Controller;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Product_Client_Controller;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UserOrderController;
 
 // 1. Route công khai (Landing Page)
 // Bất kỳ ai cũng có thể xem
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::get('/api/search-suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
 // ===== THÊM ROUTE MỚI CHO TRANG CHI TIẾT (Placeholder) =====
 Route::get('/products/{product:slug}', [Product_Client_Controller::class, 'show'])->name('product.show');
 
 Route::get('/categories/{category:slug}', [Category_Client_Controller::class, 'show'])->name('category.show');
+
 
 // ===== THÊM ROUTE MỚI CHO GIỎ HÀNG =====
 // 'auth' middleware bắt buộc user phải đăng nhập mới được thêm vào giỏ
@@ -29,19 +37,38 @@ Route::middleware('auth')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
     Route::delete('/cart/remove/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+
+    Route::patch('/my-orders/{order}/cancel', [UserOrderController::class, 'cancel'])->name('my-orders.cancel');
 });
+
 
 
 // 2. TẤT CẢ các route private (cần đăng nhập)
 // Chúng ta áp dụng 'role.gate' (dấu chấm) cho CẢ NHÓM
 Route::middleware(['auth', 'verified', 'role.gate'])->group(function () {
 
-    // A. Route cho User (Breeze dashboard)
-    // Khi Admin vào đây, 'role.gate' sẽ chặn và đẩy về /admin
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard'); // Breeze cần tên 'dashboard' này
 
+Route::get('/dashboard', function (Request $request) { // <-- Thêm Request $request
+    
+    // Lấy user
+    $user = $request->user();
+
+    // Lấy đơn hàng (logic đã dời từ ProfileController)
+    $orders = $user->orders()
+                   ->with('items.productVariant.product.images')
+                   ->latest()
+                   ->paginate(5, ['*'], 'orders_page'); // Phân trang
+
+    // Trả về view với biến orders
+    return view('dashboard', [
+        'orders' => $orders
+    ]);
+
+})->name('dashboard');
     // B. Route cho Admin
     // Khi User vào đây, 'role.gate' sẽ chặn và đẩy về /dashboard
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');

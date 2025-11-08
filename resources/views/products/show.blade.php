@@ -143,10 +143,10 @@
                                 x-text="!selectedVariant ? 'Vui lòng chọn Size/Màu' : (selectedVariant.stock_quantity <= 0 ? 'Đã hết hàng' : 'Thêm vào Giỏ hàng')"></span>
                         </button>
 
-                        <button type="button"
-                            class="px-6 py-3 border border-gray-300 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">
+                        <a href="{{ route('cart.index') }}"
+                            class="px-6 py-3 border border-gray-300 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 text-center">
                             Mua ngay
-                        </button>
+                        </a>
                     </div>
 
                 </form>
@@ -172,12 +172,14 @@
 
                 init() {
                     // Nếu chỉ có 1 màu, tự động chọn
-                    let colors = {{ Illuminate\Support\Js::from($colors) }};
+                    // @ts-ignore
+                    let colors = @json($colors);
                     if (colors.length === 1) {
                         this.selectedColor = colors[0];
                     }
-                    // Nếu chỉ có 1 size, tự động chọn
-                    let sizes = {{ Illuminate\Support\Js::from($sizes) }};
+                    // Nếu chỉ có 1 size, tự động chọn  
+                    // @ts-ignore
+                    let sizes = @json($sizes);
                     if (sizes.length === 1) {
                         this.selectedSize = sizes[0];
                     }

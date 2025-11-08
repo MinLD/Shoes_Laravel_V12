@@ -51,6 +51,46 @@
     </div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('searchComponent', () => ({
+                query: '{{ request('q', '') }}', // Lấy query từ URL (nếu có)
+                results: [],
+                isOpen: false,
+                isLoading: false,
+
+                fetchSuggestions() {
+                    // Nếu query dưới 2 ký tự, đóng lại
+                    if (this.query.length < 2) {
+                        this.isOpen = false;
+                        this.results = [];
+                        return;
+                    }
+
+                    this.isLoading = true;
+
+                    // Gọi API chúng ta vừa tạo
+                    fetch(`/api/search-suggestions?q=${this.query}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.results = data;
+                            this.isOpen = true;
+                            this.isLoading = false;
+                        });
+                },
+
+                // Hàm chuyển hướng khi bấm Enter (submit form)
+                submitSearch() {
+                    // Chuyển hướng đến trang search đầy đủ
+                    window.location.href = `/search?q=${this.query}`;
+                }
+            }));
+        });
+    </script>
+
+</body>
+
+</html>
 </body>
 
 </html>

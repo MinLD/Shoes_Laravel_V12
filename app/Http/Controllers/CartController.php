@@ -13,8 +13,11 @@ class CartController extends Controller
      */
     public function index()
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         // Lấy giỏ hàng của user (hoặc tạo mới)
-        $cart = Auth::user()->cart()->firstOrCreate();
+        $cart = $user->cart()->firstOrCreate();
         
         // Tải kèm (eager load) các quan hệ cần thiết để hiển thị
         $cart->load('items.productVariant.product.images');
@@ -35,7 +38,9 @@ class CartController extends Controller
         $variantId = $request->input('product_variant_id');
         $quantity = $request->input('quantity');
         
-        $cart = Auth::user()->cart()->firstOrCreate(); 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $cart = $user->cart()->firstOrCreate(); 
 
         $existingItem = $cart->items()
                              ->where('product_variant_id', $variantId)

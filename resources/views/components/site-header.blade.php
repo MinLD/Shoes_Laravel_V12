@@ -3,16 +3,15 @@
     <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
 
-            <!-- Logo -->
             <div class="flex-shrink-0">
                 <a href="/" class="text-2xl font-bold text-gray-900">
                     SHOE<span class="text-indigo-600">SHOP</span>
                 </a>
             </div>
 
-            <!-- Search -->
-            <div class="hidden sm:flex flex-1 px-8 lg:px-16">
-                <form action="#" method="GET" class="w-full">
+            <div x-data="searchComponent()" @click.away="isOpen = false"
+                class="hidden sm:flex flex-1 px-8 lg:px-16 relative">
+                <form @submit.prevent="submitSearch" class="w-full">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -22,14 +21,33 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <input type="search" name="q" id="q_desktop"
+                        <input type="search" name="q" id="q_desktop" x-model="query"
+                            @input.debounce.300ms="fetchSuggestions()" @focus="if (results.length > 0) isOpen = true"
+                            autocomplete="off"
                             class="block w-full rounded-md border-0 py-2.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             placeholder="Tìm kiếm sản phẩm...">
                     </div>
                 </form>
+
+                <div x-show="isOpen"
+                    class="absolute z-10 w-full mt-1 top-full bg-white rounded-lg shadow-lg border max-h-96 overflow-y-auto"
+                    style="display: none;">
+
+                    <div x-show="isLoading" class="p-4 text-sm text-gray-500">Đang tìm...</div>
+                    <div x-show="!isLoading && results.length === 0 && query.length > 1"
+                        class="p-4 text-sm text-gray-500">
+                        Không tìm thấy kết quả nào cho "<span x-text="query"></span>"
+                    </div>
+                    <template x-for="result in results" :key="result.url">
+                        <a :href="result.url" class="flex items-center p-3 hover:bg-gray-100">
+                            <img :src="result.image" alt=""
+                                class="w-12 h-12 object-cover rounded-md flex-shrink-0">
+                            <span class="ml-3 text-sm font-medium text-gray-700" x-text="result.name"></span>
+                        </a>
+                    </template>
+                </div>
             </div>
 
-            <!-- Authentication -->
             <div class="hidden sm:flex items-center space-x-4">
                 <a href="{{ route('cart.index') }}" class="p-2 text-gray-500 hover:text-gray-700">
                     <span class="sr-only">Giỏ hàng</span>
@@ -59,7 +77,6 @@
                 @endauth
             </div>
 
-            <!-- Mobile Menu and Card -->
             <div class="flex sm:hidden items-center space-x-2">
                 <a href="{{ route('cart.index') }}" class="p-2 text-gray-500 hover:text-gray-700">
                     <span class="sr-only">Giỏ hàng</span>
@@ -86,7 +103,6 @@
         </div>
     </div>
 
-    <!-- Mobile Menu -->
     <nav class="hidden sm:block bg-white shadow-sm -mt-px">
         <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="flex h-12 space-x-8">
@@ -106,7 +122,6 @@
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
     <div x-show="open" @click.away="open = false" class="sm:hidden fixed inset-0 z-50" style="display: none;">
 
         <div class="fixed inset-0 bg-black bg-opacity-25" aria-hidden="true"></div>
@@ -123,8 +138,8 @@
                 </button>
             </div>
 
-            <div class="mt-4">
-                <form action="#" method="GET" class="w-full">
+            <div x-data="searchComponent()" @click.away="isOpen = false" class="mt-4 relative">
+                <form @submit.prevent="submitSearch" class="w-full">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -134,11 +149,31 @@
                                     clip-rule="evenodd" />
                             </svg>
                         </div>
-                        <input type="search" name="q" id="q_mobile"
+                        <input type="search" name="q" id="q_mobile" x-model="query"
+                            @input.debounce.300ms="fetchSuggestions()" @focus="if (results.length > 0) isOpen = true"
+                            autocomplete="off"
                             class="block w-full rounded-md border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             placeholder="Tìm kiếm...">
                     </div>
                 </form>
+
+                <div x-show="isOpen"
+                    class="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border max-h-80 overflow-y-auto"
+                    style="display: none;">
+
+                    <div x-show="isLoading" class="p-3 text-sm text-gray-500">Đang tìm...</div>
+                    <div x-show="!isLoading && results.length === 0 && query.length > 1"
+                        class="p-3 text-sm text-gray-500">
+                        Không tìm thấy...
+                    </div>
+                    <template x-for="result in results" :key="result.url">
+                        <a :href="result.url" class="flex items-center p-3 hover:bg-gray-100">
+                            <img :src="result.image" alt=""
+                                class="w-10 h-10 object-cover rounded-md flex-shrink-0">
+                            <span class="ml-2 text-sm font-medium text-gray-700" x-text="result.name"></span>
+                        </a>
+                    </template>
+                </div>
             </div>
 
             <nav class="mt-6 space-y-1">
@@ -180,4 +215,3 @@
         </div>
     </div>
 </header>
-

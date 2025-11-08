@@ -114,7 +114,7 @@
                         thoải mái và phong cách bền bỉ. Dù bạn đang chạy marathon hay đi dạo phố, chúng tôi đều có đôi
                         giày hoàn hảo cho bạn.
                     </p>
-                    <a href="#"
+                    <a href="{{ route('home') }}"
                         class="mt-6 inline-block px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
                         Mua sắm ngay
                     </a>

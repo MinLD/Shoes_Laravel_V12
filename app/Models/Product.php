@@ -8,9 +8,10 @@ use App\Models\Category;
 use App\Models\Scopes\PublishedScope;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-
+use Laravel\Scout\Searchable;
 class Product extends Model
 {
+    use HasFactory, Searchable;
     use HasFactory;
     protected $fillable = ['category_id', 'name', 'slug', 'description', 'status'];
 
@@ -53,5 +54,26 @@ class Product extends Model
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
+    }
+    public function toSearchableArray(): array
+    {
+        // Tải các mối quan hệ
+        $this->load('category', 'variants');
+
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'slug' => $this->slug,
+            'description' => $this->description,
+            
+            // Tìm kiếm theo tên danh mục
+            'category_name' => $this->category?->name, 
+            
+            // Tìm kiếm theo các màu sắc có sẵn
+            'colors' => $this->variants->pluck('color')->unique()->filter()->all(),
+            
+            // Tìm kiếm theo các size có sẵn
+            'sizes' => $this->variants->pluck('size')->unique()->filter()->all(),
+        ];
     }
 }

@@ -1,5 +1,17 @@
 <x-main-layout>
     <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        {{-- Hiển thị lỗi nếu có --}}
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                <strong class="font-bold">Oops! Đã có lỗi xảy ra.</strong>
+                <ul class="mt-2 list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
             Giỏ hàng của bạn
         </h1>
@@ -82,7 +94,7 @@
                             <span>{{ number_format($cart->total_amount, 0, ',', '.') }} đ</span>
                         </div>
 
-                        <a href="#"
+                        <a href="{{ route('checkout.index') }}"
                             class="mt-6 w-full inline-flex justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                             Tiến hành Thanh toán
                         </a>
