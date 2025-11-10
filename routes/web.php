@@ -103,9 +103,14 @@ Route::get('/dashboard', function (Request $request) { // <-- Thêm Request $req
     // Thêm (store) 1 biến thể mới cho 1 sản phẩm
     Route::post('/admin/products/{product}/variants', [ProductVariantController::class, 'store'])->name('admin.variants.store');
     // Cập nhật (update) 1 biến thể cụ thể
+    Route::get('/admin/products/{product}/variants/{variant}/edit', [ProductVariantController::class, 'edit'])->name('admin.variants.edit');
     Route::patch('/admin/products/{product}/variants/{variant}', [ProductVariantController::class, 'update'])->name('admin.variants.update');
     // Xóa (destroy) 1 biến thể cụ thể
     Route::delete('/admin/products/{product}/variants/{variant}', [ProductVariantController::class, 'destroy'])->name('admin.variants.destroy');
+
+    Route::patch('/admin/variants/{variant}', [ProductVariantController::class, 'update'])->name('admin.variants.update');
+    
+    Route::delete('/admin/variants/{variant}', [ProductVariantController::class, 'destroy'])->name('admin.variants.destroy');
 
     // ===== ROUTE XỬ LÝ PRODUCT IMAGES (Upload/Delete) =====
     Route::post('/admin/products/{product}/images', [ProductImageController::class, 'store'])->name('admin.images.store');

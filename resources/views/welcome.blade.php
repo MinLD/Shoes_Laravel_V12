@@ -101,8 +101,8 @@
         <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div>
-                    <img src="https://loremflickr.com/800/600/person,shoe" alt="Chất lượng"
-                        class="w-full h-80 object-cover rounded-lg shadow-md">
+                    <img src="https://img2.dilyno.com/S2zm-tFzMSBRgK9ZyfWtWUCjykpeRwILddvMGU-gEbQ/rs:fit:900:1200:0/ex:1:ce/background:eeeeee/aHR0cHM6Ly9zMy1kaWx5LXdlYi5kaWx5bm8uY29tL3dlYmVjb20vMjAyNC8xMi9iODc3YzQxMmYwMGMzMDFkODdiZDVkMWJhYjAzMTMwMi5wbmc.jpg"
+                        alt="Chất lượng" class="w-full h-80 object-cover rounded-lg shadow-md">
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold uppercase text-indigo-600">Chất lượng hàng đầu</h3>
